@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/defaultLayout}">
+	<th:block layout:fragment="content"> 
+		<section class="contents d-flex justify-content-center">
+			<div class="w-50 py-4">
+				<h1 class="mb-4">회원가입</h1>
+				<form id="signUpForm" method="post" action="/user/sign-up">
+					<table class="sign-up-table table table-bordered">
+						<tr>
+							<th>* 아이디(4자 이상)<br></th>
+							<td>
+								<!-- 인풋박스 옆에 중복확인을 붙이기 위해 div를 하나 더 만들고 d-flex -->
+								<div class="d-flex">
+									<input type="text" id="loginId" name="loginId" class="form-control col-10" placeholder="아이디를 입력하세요.">
+									<button type="button" id="loginIdCheckBtn" class="btn btn-success">중복확인</button><br>
+								</div>
+								
+								<!-- 아이디 체크 결과 -->
+								<!-- d-none 클래스: display none (보이지 않게) -->
+								<div id="idCheckLength" class="small text-danger d-none">ID를 4자 이상 입력해주세요.</div>
+								<div id="idCheckDuplicated" class="small text-danger d-none">이미 사용중인 ID입니다.</div>
+								<div id="idCheckOk" class="small text-success d-none">사용 가능한 ID 입니다.</div>
+							</td>
+						</tr>
+						<tr>
+							<th>* 비밀번호</th>
+							<td><input type="password" id="password" name="password" class="form-control" placeholder="비밀번호를 입력하세요."></td>
+						</tr>
+						<tr>
+							<th>* 비밀번호 확인</th>
+							<td><input type="password" id="confirmPassword" class="form-control" placeholder="비밀번호를 입력하세요."></td>
+						</tr>
+						<tr>
+							<th>* 이름</th>
+							<td><input type="text" id="name" name="name" class="form-control" placeholder="이름을 입력하세요."></td>
+						</tr>
+						<tr>
+							<th>* 이메일</th>
+							<td><input type="text" id="email" name="email" class="form-control" placeholder="이메일 주소를 입력하세요."></td>
+						</tr>
+					</table>
+					<br>
+			
+					<button type="submit" id="signUpBtn" class="btn btn-primary float-right">회원가입</button>
+				</form>
+			</div>
+		</section>
+	</th:block>
+<th:block layout:fragment="script">
+	<script>
+		$(document).ready(function() {
+			$("#loginIdCheckBtn").on("click", function() {
+				// 문구를 안 보이게 초기화
+				$("#idCheckLength").addClass("d-none");
+				$("#idCheckDuplicated").addClass("d-none");
+				$("#idCheckOk").addClass("d-none");
+				
+				let loginId = $("input[name=loginId]").val().trim();
+				
+				// validation
+				if (loginId.length < 4) {
+					$("#idCheckLength").removeClass("d-none");
+					return;
+				}
+				
+				// AJAX
+				$.ajax({
+					// request
+					// type 생략하면 GET 요청
+					
+					url:"/user/is-duplicate-id"
+					, data:{"loginId":loginId}
+					
+					// response
+					, success:function(data) {
+						if (data.code == 200) {
+							if (data.is_duplicate_id) {
+								// 중복
+								$("#idCheckDuplicated").removeClass("d-none");
+							} else {
+								// 사용 가능
+								$("#idCheckOk").removeClass("d-none");
+							}
+						}
+					}
+					, error:function(e) {
+						alert("중복확인에 실패했습니다.");
+					}
+					
+				});
+			}); // 
+			// 회원가입
+			$("#signUpForm").on("submit", function(e) {
+				e.preventDefault(); // submit 중단.(화면 이동 안 함.)
+				// alert("");
+				
+				// validation
+				let loginId = $("#loginId").val().trim();
+				let password = $("#password").val();
+				let confirmPassword = $("#confirmPassword").val();
+				let name = $("#name").val().trim();
+				let email = $("#email").val().trim();
+				
+				// 아이디 validation
+				if (!loginId) {
+					alert("아이디를 입력하세요.");
+					return false; // submit 이벤트를 종료할 때는 return false를 해야 함.
+				}
+				
+				// 비밀번호 validation
+				if (!password || !confirmPassword) {
+					alert("비밀번호를 입력하세요.");
+					return false;
+				}
+				
+				if (password != confirmPassword) {
+					alert("비밀번호가 일치하지 않습니다.");
+					return false;
+				}
+				
+				// 이름 validation
+				if (!name) {
+					alert("이름을 입력하세요.");
+					return false;
+				}
+				
+				// 이메일 validation
+				if (!email) {
+					alert("이메일을 입력하세요.");
+					return false;
+				}
+				
+				// loginId 중복확인 후 사용 가능한지 확인
+				// #idCheckOk에 d-none이 있으면 alert
+				if ($("#idCheckOk").hasClass("d-none")) {
+					alert("아이디 중복확인을 해주세요.");
+					return false;
+				}
+				
+				// 1) form 전송 => 다음 화면으로 이동
+				// $(this)[0].submit(); // [0]은 몇 번째 form인지의 인덱스.
+				
+				// 2) ajax 전송 => 응답이 JSON
+				let url = $(this).attr("action") // this는 form태그. form 태그의 action attr를 가져와서 사용했다
+				// console.log(url);
+				
+				let params = $(this).serialize(); // 직렬화
+				// 직렬화 => form 태그의 name 속성과 value를 직렬화해서 request parameter로 구성함.
+				// 한글은 자동으로 변환됨.
+				// loginId=user1&password=1234&name=%EC%96%91%EC%A4%80%ED%98%B8&email=%E3%85%81%E3%84%B4%E3%85%87%E3%84%B9
+				// console.log(params);
+				
+				// post로 ajax 통신 
+				// 파라미터 두 개는 url과 parameter들(직렬화된 params그 자체 또는 딕셔너리)
+				
+				$.post(url, params) // request
+				.done(function(data) { // response - callback
+					if (data.code == 200) {
+						// 성공
+						alert("가입을 환영합니다. 로그인 해주세요.");
+						location.href = "/user/sign-in-view";
+						
+					} else { // 제대로 하려면 else if 로 구현
+						// 로직 상 실패
+						alert(data.error_message);
+					}
+				}); // done은 response의 성공 시. ajax 종료
+					// 실패했을 때는 생략.
+				
+				
+				return false;
+				
+				
+				
+				
+			}); // form 태그 submit 이벤트 - 회원가입 종료
+			
+		}); // document ready 이벤트 종료
+	</script>
+</th:block>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultLayout}">
+<section layout:fragment="content" class="contents d-flex justify-content-center">
+	<form id="loginForm" method="post" action="/user/sign-in">
+		<input id="loginId" type="text" name="loginId">
+		<input id="password" type="password" name="password">
+		<button type="submit">로그인</button>
+	</form>
+</section>
+
+<th:block layout:fragment="script">
+    <script>
+		$(document).ready(function() {
+			// 로그인 submit
+			$("#loginForm").on("submit", function(e) {
+				e.preventDefault(); // submit 중단
+				
+				// validation
+				let loginId = $("#loginId").val().trim();
+				let password = $("#password").val().trim();
+				
+				if (!loginId) {
+					alert("아이디를 입력하세요.")
+					return false;
+				}
+				
+				if (!password) {
+					alert("비밀번호를 입력하세요.")
+					return false;
+				}
+				
+				let url = $(this).attr("action");
+				let params = $(this).serialize(); // name 속성 필수.
+				
+				// ajax
+				$.post(url, params) // request
+				.done(function(data) { // response - callback
+					if (data.result == "성공") {
+						// 로그인 성공 시 글 목록 화면으로 이동
+						alert("로그인 성공");
+						location.href = "/post/post-list-view";
+					} else {
+						alert(data.error_message);
+					}
+				})
+				.fail(function(e) {
+					alert("접속이 원활하지 않습니다. 잠시 후에 다시 시도해주세요.");
+				});
+				
+				return false;
+				
+			}); // 로그인 form submit 종료
+		}); // document ready 종료
+    </script>
+</th:block>
