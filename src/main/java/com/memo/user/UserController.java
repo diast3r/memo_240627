@@ -4,6 +4,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping("/user")
 public class UserController {
@@ -25,6 +27,18 @@ public class UserController {
 	@GetMapping("/sign-in-view")
 	public String signInView() {
 		return "user/signIn";
+	}
+	
+	@GetMapping("/sign-out")
+	public String signOut(HttpSession session) {
+		// session 내용 비우기
+		// User객체를 가져와서 파라미터로 넣으면 한 번에 지울 수도 있음.
+		// 민감한 정보 들어있는 객체 가져오는 것은 안 좋을 수도 있으므로 
+		session.removeAttribute("userId");
+		session.removeAttribute("userLoginId");
+		session.removeAttribute("userName");
+		
+		return "redirect:/user/sign-in-view";
 	}
 	
 }

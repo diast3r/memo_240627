@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.memo.common.EncryptUtils;
 import com.memo.user.bo.UserBO;
 import com.memo.user.entity.UserEntity;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @RequestMapping("/user")
 @RestController
@@ -90,8 +92,8 @@ public class UserRestController {
 	@PostMapping("/sign-in")
 	public Map<String, Object> signIn(
 			@RequestParam("loginId") String loginId,
-			@RequestParam("password") String password
-//			,HttpServletRequest request
+			@RequestParam("password") String password,
+			HttpServletRequest request // HttpSession 을 바로 불러와도 됨.
 			) {
 		
 		// db select
@@ -101,10 +103,10 @@ public class UserRestController {
 		if (user != null) {
 			// 세션에 사용자 각각의 정보를 담는다.(사용자 각각을)
 			// 세션에 담은 정보는 컨트롤러, bo 등 어디서나 쓸 수 있음.
-//			HttpSession session = request.getSession();
-//			session.setAttribute("userId", user.getId());
-//			session.setAttribute("userLoginId", user.getLoginId());
-//			session.setAttribute("userName", user.getName());
+			HttpSession session = request.getSession();
+			session.setAttribute("userId", user.getId());
+			session.setAttribute("userLoginId", user.getLoginId());
+			session.setAttribute("userName", user.getName());
 	
 			result.put("code", 200);
 			result.put("result", "성공");

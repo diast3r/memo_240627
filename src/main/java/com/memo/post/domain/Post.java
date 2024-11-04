@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import lombok.Data;
 
-@Data
+@Data // getter, setter 포함하는 어노테이션
 public class Post {
 	private int id;
 	private int userId;
