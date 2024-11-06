@@ -15,8 +15,9 @@ import com.memo.post.mapper.PostMapper;
 public class PostBO {
 	@Autowired
 	private PostMapper postMapper;
+	
 	@Autowired
-	private FileManagerService fileManagerService;
+	private FileManagerService fileManager;
 	
 	public List<Post> getPostListByUserId(int userId) {
 		return postMapper.selectPostListByUserId(userId);
@@ -34,11 +35,10 @@ public class PostBO {
 		// file이 있을 때에만 업로드 => 있을 시 imagePath를 얻어냄
 		// imagePath를 얻는 코드는 common 패키지 안에 클래스를 만들어서 여러 곳에서 가져다 쓸 것임.
 		if (file != null) {
-			imagePath = fileManagerService.uploadFile(file, userLoginId);
+			imagePath = fileManager.uploadFile(file, userLoginId);
 		}
 		
-		return 0;
-		//return postMapper.insertPost(userId, subject, content, imagePath);
+		return postMapper.insertPost(userId, subject, content, imagePath);
 		
 	}
 	
