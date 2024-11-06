@@ -16,8 +16,8 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr th:each="post : ${postList}">
-					<td th:text="${post.id}"></td>
+				<tr th:each="post, state: ${postList}">
+					<td th:text="${state.count}"></td>
 					<td>
 						<a th:href="|/post/post-detail-view?postId=${post.id}|" th:text="${post.subject}"></a>
 						<!--/* <a th:href="@{/post/post-detail-view(postId=${post.id})}" th:text="${post.subject}"></a> */-->
