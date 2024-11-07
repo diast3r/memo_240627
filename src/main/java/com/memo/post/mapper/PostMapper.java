@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.memo.post.domain.Post;
 
@@ -25,4 +24,10 @@ public interface PostMapper {
 			@Param(value="content") String content, 
 			@Param(value="imagePath") String imagePath
 			);
+	
+	// input: postId, userId
+	// output: Post or null
+	public Post selectPostByPostIdUserId(
+			@Param("postId") int postId,
+			@Param("userId") int userId);
 }

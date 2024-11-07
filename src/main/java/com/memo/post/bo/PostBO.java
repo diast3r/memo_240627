@@ -2,6 +2,7 @@ package com.memo.post.bo;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +41,10 @@ public class PostBO {
 		
 		return postMapper.insertPost(userId, subject, content, imagePath);
 		
+	}
+	
+	public Post getPostByPostIdUserId(int postId, int userId) {
+		return postMapper.selectPostByPostIdUserId(postId, userId);
 	}
 	
 }
