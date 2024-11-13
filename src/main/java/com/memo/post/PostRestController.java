@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +23,15 @@ public class PostRestController {
 	@Autowired
 	private PostBO postBO;
 	
-	
+	/**
+	 * 글쓰기<br>
+	 * 
+	 * @param subject
+	 * @param content
+	 * @param file
+	 * @param session
+	 * @return
+	 */
 	@PostMapping("/create")
 	public Map<String, Object> create(
 			@RequestParam("subject") String subject,
@@ -48,4 +58,46 @@ public class PostRestController {
 		
 		return result;
 	}
+	
+	@PutMapping("/update")
+	public Map<String, Object> update(
+			@RequestParam("postId") int postId,
+			@RequestParam("subject") String subject,
+			@RequestParam("content") String content,
+			@RequestParam(value = "file", required = false) MultipartFile file,
+			HttpSession session) {
+		
+		// 세션 => userId(db), userLoginId(파일 업로드)
+		int userId = (int)session.getAttribute("userId"); // 로그인 안 한 사람이 요청하면 에러가 나도록 (int)로 다운캐스팅.
+		String userLoginId = (String)session.getAttribute("userLoginId");
+		
+		// db 업데이트 + 파일 업로드
+		postBO.updatePostByPostIdUserId(userLoginId, postId, userId, subject, content, file);
+		
+		
+		// 응답값
+		Map<String, Object> result = new HashMap<>();
+		result.put("code", 200);
+		result.put("result", "성공");
+		
+		return result;
+	}
+	
+	@DeleteMapping("/delete")
+	public Map<String, Object> delete(
+			@RequestParam("postId") int postId,
+			HttpSession session) {
+		int userId = (int)session.getAttribute("userId");
+		
+		// 삭제 요청
+		postBO.deletePostByPostIdUserId(postId, userId);
+		
+		// 응답값
+		Map<String, Object> result = new HashMap<>();
+		result.put("code", 200);
+		result.put("result", "성공");
+		
+		return result;
+	}
+	
 }

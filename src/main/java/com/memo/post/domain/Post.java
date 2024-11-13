@@ -2,9 +2,11 @@ package com.memo.post.domain;
 
 import java.time.LocalDateTime;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data // getter, setter 포함하는 어노테이션
+@Setter
+@Getter // getter, setter 포함하는 어노테이션
 public class Post {
 	private int id;
 	private int userId;

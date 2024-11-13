@@ -22,12 +22,23 @@ public interface PostMapper {
 			@Param(value="userId") int userId, 
 			@Param(value="subject") String subject, 
 			@Param(value="content") String content, 
-			@Param(value="imagePath") String imagePath
-			);
+			@Param(value="imagePath") String imagePath);
 	
 	// input: postId, userId
 	// output: Post or null
 	public Post selectPostByPostIdUserId(
 			@Param("postId") int postId,
 			@Param("userId") int userId);
+	
+	// input: postId, subject, content, imagePath    output: int or void
+	public void updatePostByPostId(
+			@Param("postId") int postId,
+			@Param(value="subject") String subject, 
+			@Param(value="content") String content, 
+			@Param(value="imagePath") String imagePath);
+			
+	
+	// input: postId
+	// output: int(삭제된 행 개수)
+	public int deletePostByPostId(int postId);
 }

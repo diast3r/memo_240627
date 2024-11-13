@@ -21,10 +21,10 @@
 		</div>
 		
 		<div class="d-flex justify-content-between">
-			<button id="delBtn" type="button" class="btn btn-secondary">삭제</button>
+			<button id="delBtn" type="button" class="btn btn-secondary" th:data-post-id="${post.id}">삭제</button>
 			<div>
 				<a class="btn btn-dark" href="/post/post-list-view">목록</a>
-				<button id="saveBtn" type="button" class="btn btn-warning">수정</button>
+				<button id="saveBtn" type="button" class="btn btn-warning" th:data-post-id="${post.id}">수정</button>
 			</div>
 		</div>
 		
@@ -33,6 +33,98 @@
 
 <th:block layout:fragment="script">
     <script>
-
+		$(document).ready(function() {
+			
+			// 글 수정
+			$("#saveBtn").on("click", function() {
+				// validation
+				let postId = $(this).data("post-id");
+				let subject = $("#subject").val().trim();
+				let content = $("#content").val();
+				let fileName = $("#file").val(); // C:\fakepath\화면 캡처 2022-11-23 152240.png
+				
+				
+				if (!subject) {
+					alert("제목을 입력하세요");
+					return;
+				}
+				
+				if (!content) {
+					alert("내용을 입력하세요");
+					return;
+				}
+				
+				// 파일명이 있으면 확장자 체크
+				if (fileName) {
+					// alert("파일이 있다.");
+					// C:\fakepath\화면 캡처 2022-11-23 152240.png
+					let extension = fileName.split(".").pop().toLowerCase(); // pop: 마지막부터 차례로 뽑음. stack을 공부하면 알 수 있음.
+					//console.log(extension);
+					
+					
+					if ($.inArray(extension, ["jpg", "png", "gif"]) == -1) { // inArray() : 있으면 인덱스를 반환하고, 없으면 -1 반환
+						alert("이미지 파일만 업로드 할 수 있습니다.");
+						$("#file").val(""); // 파일을 비운다.
+						return;
+					}
+				}
+				
+				
+				
+				// 이미지 업로드 시 form 태그가 필요하다.
+				// 가상의 form 태그를 js에서 만듦. new FormData()
+				// append("name", 값) => FormData의 input 의 name값을 넣기
+				let formData = new FormData();
+				
+				// Model에 담겨있는 객체를 javascript에서 바로 가져오는 문법이 있을 수도 있으니 찾아보기
+				formData.append("postId", postId)
+				formData.append("subject", subject); // ajax 요청 보낼 때의 parameter 이름에 맞추기
+				formData.append("content", content);
+				formData.append("file", $("#file")[0].files[0]);
+				
+				$.ajax({
+					type:"put"
+					,url:"/post/update"
+					,data:formData
+					,processData:false // 파일 업로드 필수 설정
+					,contentType:false // 파일 업로드 필수 설정 
+					,enctype:"multipart/form-data" // 파일 업로드 필수 설정
+					
+					,success:function(data) {
+						if (data.code == 200) {
+							alert("글이 수정되었습니다.");
+							location.reload();
+						}
+					}
+					
+				}); // 글 수정 ajax 종료
+			}); // 글 수정 종료
+			
+			// 글 삭제
+			$("#delBtn").on("click", function() {
+				let postId = $(this).data("post-id");
+				
+				$.ajax({
+					type:"delete"
+					,url:"/post/delete"
+					,data:{"postId":postId}
+					,success:function(data) {
+						if (data.code == 200) {
+							alert("메모가 삭제되었습니다.");
+							location.href = "/post/post-list-view";
+						}
+					}
+					,error:function(e) {
+						alert("실패");
+					}
+				});
+				
+				
+				
+			}); // 글 삭제 종료
+			
+			
+			
+		}); // document ready 종료
     </script>
 </th:block>

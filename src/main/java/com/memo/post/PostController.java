@@ -56,6 +56,14 @@ public class PostController {
 		return "post/postCreate";
 	}
 	
+	/**
+	 * 글 상세 화면<br>
+	 * 
+	 * @param postId
+	 * @param session
+	 * @param model
+	 * @return
+	 */
 	@GetMapping("/post-detail-view")
 	public String postDetailView(
 			@RequestParam("postId") int postId, 
@@ -69,7 +77,7 @@ public class PostController {
 		
 		
 		// model 담기
-		model.addAttribute(post);
+		model.addAttribute("post", post);
 		
 		
 		return "post/postDetail";

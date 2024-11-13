@@ -9,6 +9,9 @@ import java.nio.file.Paths;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class FileManagerService {
 	// 실제 업로드 된 이미지가 저장될 서버 경로
@@ -50,5 +53,41 @@ public class FileManagerService {
 		// /images/didwnsgugh_01982370950/sun.png
 		// => /images/directoryName/file.getOriginalFilename()
 		return "/images/" + directoryName + "/" + file.getOriginalFilename();
+	}
+	
+	
+	// 서버에 업로드된 이미지 삭제
+	// input: db에 저장된 경로(imagePath)
+	// output: X
+	public void deleteFile(String imagePath) {
+		// D:\\메가스터디it아카데미\\6_Spring_project\\memo\\memo_workspace\\images//images/asdf_1730889214464/test.png (FILE_UPLOAD_PATH + imagePath)
+		// D:\\메가스터디it아카데미\\6_Spring_project\\memo\\memo_workspace\\images/ (FILE_UPLOAD_PATH)
+		// /images/asdf_1730889214464/test.png (db 에 저장된 경로)
+		// "/images/" 겹치므로 제거해야 함.
+		Path path = Paths.get(FILE_UPLOAD_PATH + imagePath.replace("/images/", ""));
+		
+		// 삭제할 이미지가 있는가?
+		if (Files.exists(path)) {
+			// 이미지 삭제 
+			try {
+				Files.delete(path);
+			} catch (IOException e) {
+				log.info("[파일매니저 파일삭제] imagePath:{}", imagePath);
+				return;
+			}
+			
+			// 폴더(directory) 삭제
+			// 현재 path(이미지 파일) 의 상위 경로(디렉토리) 구하기
+			path = path.getParent();
+			if (Files.exists(path)) {
+				try {
+					Files.delete(path);
+				} catch (IOException e) {
+					log.info("[파일매니저 폴더삭제] imagePath:{}", imagePath);
+				}
+			}
+			
+		}
+		
 	}
 }
