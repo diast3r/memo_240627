@@ -56,12 +56,12 @@ public class PostBO {
 	/**
 	 * post 업데이트<br>
 	 * 
-	 * @param loginId
-	 * @param postId
-	 * @param userId
-	 * @param subject
-	 * @param content
-	 * @param file
+	 * @param loginId 파일명을 짓기 위해 필요
+	 * @param postId 수정할 게시글 PK
+	 * @param userId 게시글 조회할 때 같이 조건으로 쓰면 저절로 사용자 인증 가능
+	 * @param subject 제목
+	 * @param content 내용
+	 * @param file 이미지 파일
 	 */
 	// input: userLoginId(파일), postId, userId, subject, content, file
 	// output: X
@@ -79,7 +79,7 @@ public class PostBO {
 		}
 		
 		
-		log.info("[글 수정 테스트] post is null. postId:{}, usreId:{}", postId, userId);
+		log.info("[글 수정 테스트] postId:{}, usreId:{}", postId, userId);
 		// 업로드할 파일이 존재 시 새 이미지 업로드
 		String imagePath = null;
 		if (file != null) {
@@ -92,8 +92,6 @@ public class PostBO {
 				// 기존 폴더, 이미지 제거(서버에 업로드된)
 				fileManager.deleteFile(post.getImagePath());
 			}
-			
-		} else {
 			
 		}
 		
