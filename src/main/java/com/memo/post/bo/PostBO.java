@@ -1,5 +1,6 @@
 package com.memo.post.bo;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ public class PostBO {
 	// private Logger log = LoggerFactory.getLogger(PostBO.class); // org.slf4j.Logger;
 	private Logger log = LoggerFactory.getLogger(this.getClass()); // 클래스 명을 변경하지 않고 유동적으로 사용 가능
 	
+	private static final int POST_MAX_SIZE = 3;
 	
 	@Autowired
 	private PostMapper postMapper;
@@ -25,9 +27,51 @@ public class PostBO {
 	@Autowired
 	private FileManagerService fileManager;
 	
-	public List<Post> getPostListByUserId(int userId) {
-		return postMapper.selectPostListByUserId(userId);
+	public List<Post> getPostListByUserId(int userId, Integer prevId, Integer nextId) {
+		// 게시글 번호 : 10 9 8 | 7 6 5 | 4 3 2 | 1
+		// 만약 4 3 2 페이지에 있을 때
+		// 1) 다음: nextId != null  => 2보다 작은 3개 desc
+		// 2) 이전: prevId != null  => 4보다 큰 3개 asc => BO에서 List를 reverse()
+		// 3) 페이징 없음(next, prevId 모두 없음): 최신순 3개 desc
+		
+		// xml에서 (굳이, 해보기 위해)하나의 쿼리로 만들기 위해 변수를 정제해본다.
+		Integer standardId = null; // 기준 id(prev or next or null)
+		String direction = null; // 방향
+		
+		if (prevId != null) { // 2) 이전 페이지
+			standardId = prevId;
+			direction = "prev";
+			
+			List<Post> postList = postMapper.selectPostListByUserId(userId, standardId, direction, POST_MAX_SIZE);
+			
+			// 7 6 5 reverse
+			Collections.reverse(postList);
+			return postList;
+		} else if (nextId != null) { // 1) 다음 페이지
+			standardId = nextId;
+			direction = "next";
+			
+			// TODO 이전 페이징 
+		}
+		
+		
+		// 3) 페이징 없음 또는 1) 다음
+		return postMapper.selectPostListByUserId(userId, standardId, direction, POST_MAX_SIZE);
 	}
+	
+	
+	// 이전 페이지의 마지막인가?
+	public boolean isPrevLastPageByUserId(int userId, int prevId) {
+		int maxPostId = postMapper.selectIdByUserIdAsSort(userId, "DESC");
+		return maxPostId == prevId;
+	}
+	
+	// 다음 페이지의 마지막인가?
+	public boolean isNextLastPageByUserId(int userId, int nextId) {
+		int minPostId = postMapper.selectIdByUserIdAsSort(userId, "ASC");
+		return minPostId == nextId;
+	}
+	
 	
 	
 	// input: userId(컨트롤러가 세션에서 꺼내서), userLoginId(컨트롤러가 세션에서 꺼내서), subject, content, file => imgPath

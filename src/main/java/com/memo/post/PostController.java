@@ -22,7 +22,10 @@ public class PostController {
 	private PostBO postBO;
 	
 	@GetMapping("/post-list-view")
-	public String postListView(Model model, HttpSession session) {
+	public String postListView(
+			@RequestParam(value = "prevId", required = false) Integer prevIdParam, // 이전 페이지 페이징을 위한 파라미터 
+			@RequestParam(value = "nextId", required = false) Integer nextIdParam, // 다음 페이지 페이징을 위한 파라미터
+			Model model, HttpSession session) {
 		// 로그인 여부 확인(권한 검사)
 		// TODO
 		
@@ -36,10 +39,31 @@ public class PostController {
 		}
 		
 		// db select => 로그인된 사람이 쓴 글만
-		List<Post> postList = postBO.getPostListByUserId(userId);
+		List<Post> postList = postBO.getPostListByUserId(userId, prevIdParam, nextIdParam);
+		int prevId = 0;
+		int nextId = 0;
+		
+		if (postList.isEmpty() == false) { // postList가 비어있지 않은 경우 페이징 정보 세팅, MyBatis는 List로 null을 반환하지 않으므로 size()나 isEmpty()사용 
+			nextId = postList.get(postList.size() - 1).getId(); // postList의 마지막 post의 id 가져오기
+			prevId = postList.get(0).getId(); // postList의 마지막 post의 id 가져오기
+			
+			// 이전 페이지가 없는가? -> 그렇다면 0
+			// select `id` from `post` where `userId` = ? order by `id` desc limit 1 => post 테이블의 가장 큰(마지막) id
+			if (postBO.isPrevLastPageByUserId(userId, prevId)) { // boolean return
+				prevId = 0;
+			}
+			
+			// 다음 페이지가 없는가? -> 그렇다면 0
+			// select `id` from `post` where `userId` = ? order by `id` desc limit 1 => post 테이블의 가장 작은(첫 번째) id
+			if (postBO.isNextLastPageByUserId(userId, nextId)) { // boolean return
+				nextId = 0;
+			}
+		}
 		
 		// Model에 담기
 		model.addAttribute("postList", postList);
+		model.addAttribute("nextId", nextId);
+		model.addAttribute("prevId", prevId);
 		
 		return "post/postList";
 	}

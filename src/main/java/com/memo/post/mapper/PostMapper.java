@@ -14,8 +14,16 @@ public interface PostMapper {
 	public List<Map<String, Object>> selectPostList();
 	
 	
-	// input:int(loginId) output:List<Post>
-	public List<Post> selectPostListByUserId(int userId);
+	// input:int(loginId) + 페이징 정보 output:List<Post>
+	public List<Post> selectPostListByUserId(
+			@Param("userId") int userId, 
+			@Param("standardId") Integer standardId, 
+			@Param("direction") String direction, 
+			@Param("limit") int limit);
+	
+	public int selectIdByUserIdAsSort(
+			@Param("userId") int userId,
+			@Param("sort") String sort);
 	
 	// input:params output:int or void
 	public int insertPost(
