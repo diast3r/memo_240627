@@ -59,7 +59,7 @@ public class PostController {
 				nextId = 0;
 			}
 		}
-		
+		// 테스트 issue 주석 추가
 		// Model에 담기
 		model.addAttribute("postList", postList);
 		model.addAttribute("nextId", nextId);
